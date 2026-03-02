@@ -586,13 +586,70 @@ async function start() {
       `Claws Office running on http://localhost:${PORT} (${isProduction ? 'production' : 'development'})`
     );
   });
+  const sockets = new Set();
+  let shuttingDown = false;
+  let forceExitTimer = null;
 
-  const shutdown = async () => {
-    server.close(() => process.exit(0));
+  server.on('connection', socket => {
+    sockets.add(socket);
+    socket.on('close', () => {
+      sockets.delete(socket);
+    });
+  });
+
+  const shutdown = signal => {
+    if (shuttingDown) {
+      console.warn(`Received ${signal} again, forcing shutdown.`);
+      sockets.forEach(socket => {
+        try {
+          socket.destroy();
+        } catch {}
+      });
+      process.exit(1);
+      return;
+    }
+
+    shuttingDown = true;
+    console.log(`Received ${signal}, shutting down...`);
+
+    if (broadcastTimeout) {
+      clearTimeout(broadcastTimeout);
+      broadcastTimeout = null;
+    }
+
+    sseClients.forEach(client => {
+      try {
+        client.end();
+      } catch {}
+    });
+    sseClients.clear();
+
+    forceExitTimer = setTimeout(() => {
+      console.warn('Graceful shutdown timed out, forcing shutdown.');
+      sockets.forEach(socket => {
+        try {
+          socket.destroy();
+        } catch {}
+      });
+      process.exit(1);
+    }, 5000);
+    forceExitTimer.unref();
+
+    server.close(error => {
+      if (forceExitTimer) {
+        clearTimeout(forceExitTimer);
+      }
+      if (error) {
+        console.error('Failed to close server gracefully:', error);
+        process.exit(1);
+        return;
+      }
+      process.exit(0);
+    });
   };
 
-  process.on('SIGINT', shutdown);
-  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
 }
 
 start().catch(error => {
