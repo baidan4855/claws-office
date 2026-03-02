@@ -1,0 +1,129 @@
+.edit-panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-panel {
+  background: rgba(10,20,35,0.97);
+  border: 1px solid rgba(255,220,120,0.35);
+  border-radius: 12px;
+  padding: 20px;
+  width: 320px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edit-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.edit-panel-title {
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  color: var(--hud-accent);
+  letter-spacing: 1px;
+}
+
+.edit-panel-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.edit-panel-close:hover { color: var(--text-primary); background: rgba(255,255,255,0.08); }
+
+.edit-avatar-preview {
+  font-size: 52px;
+  text-align: center;
+  line-height: 1;
+  padding: 8px 0 4px;
+}
+
+.edit-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+}
+
+.edit-input {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  padding: 7px 10px;
+  color: var(--text-primary);
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 13px;
+  outline: none;
+  width: 100%;
+}
+.edit-input:focus { border-color: rgba(255,220,120,0.4); }
+
+.edit-group-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.edit-group-opt {
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: 'Noto Sans SC', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.edit-group-opt:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+.edit-group-opt.active { background: var(--hud-accent); color: #1a1000; border-color: var(--hud-accent); }
+
+.edit-avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.edit-avatar-opt {
+  font-size: 22px;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 3px;
+  line-height: 1;
+  transition: all 0.12s;
+}
+.edit-avatar-opt:hover { background: rgba(255,255,255,0.08); }
+.edit-avatar-opt.active { border-color: var(--hud-accent); background: rgba(255,213,79,0.12); }
+
+.edit-save-btn {
+  margin-top: 4px;
+  padding: 9px;
+  background: var(--hud-accent);
+  color: #1a1000;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Noto Sans SC', sans-serif;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.edit-save-btn:hover { opacity: 0.85; }

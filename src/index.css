@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=VT323&family=Noto+Sans+SC:wght@400;600;700&display=swap');
+
+:root {
+  /* 办公室配色 */
+  --sky-top: #1a3a5c;
+  --sky-mid: #2d5a8e;
+  --sky-bottom: #4a7fb5;
+  --wall-color: #c8a87a;
+  --wall-dark: #a8885a;
+  --floor-color: #4a3020;
+  --floor-tile: #3e2818;
+  --desk-top: #a0714f;
+  --desk-side: #7a5230;
+  --desk-highlight: #c4956a;
+
+  /* 显示器状态颜色 */
+  --monitor-idle: #263238;
+  --monitor-coding: #4fc3f7;
+  --monitor-thinking: #ffd54f;
+  --monitor-researching: #80deea;
+  --monitor-debugging: #ef9a9a;
+  --monitor-testing: #ce93d8;
+  --monitor-reporting: #a5d6a7;
+  --monitor-working: #4fc3f7;
+
+  /* HUD */
+  --hud-bg: rgba(10, 20, 35, 0.92);
+  --hud-border: rgba(255, 220, 120, 0.3);
+  --hud-text: #fff8e7;
+  --hud-accent: #ffd54f;
+  --hud-green: #69f0ae;
+  --hud-red: #ff5252;
+
+  /* 文字 */
+  --text-primary: #fff8e7;
+  --text-secondary: #c8b89a;
+  --text-muted: #8a7a6a;
+}
+
+*, *:hover, *:focus {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ctext y='28' font-size='28'%3E👆%3C/text%3E%3C/svg%3E") 12 0, auto !important;
+  
+}
+
+body {
+  font-family: 'Noto Sans SC', sans-serif;
+  background: var(--sky-top);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--floor-color); }
+::-webkit-scrollbar-thumb { background: var(--desk-side); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--desk-top); }

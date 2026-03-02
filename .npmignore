@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Source files
+src/
+*.ts
+*.tsx
+!*.d.ts
+
+# Config files
+tsconfig*.json
+vite.config.ts
+.eslintrc.cjs
+.prettierrc
+.editorconfig
+
+# Development
+.git/
+.gitignore
+.vscode/
+*.log
+
+# Documentation
+docs/
+README.md
+CONTRIBUTING.md
+CHANGELOG.md
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Misc
+*.swp
+*.swo

@@ -1,0 +1,554 @@
+/* ===== 整体 ===== */
+.app {
+  min-width: 1440px;
+  min-height: 600px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ===== HUD 头部 ===== */
+.compact-header {
+  height: 52px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: rgba(10, 20, 35, 0.95);
+  border-bottom: 2px solid rgba(255, 220, 120, 0.3);
+  position: relative;
+  z-index: 100;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.5);
+}
+
+.header-left { display: flex; align-items: center; gap: 12px; }
+
+.title {
+  font-family: 'VT323', monospace;
+  font-size: 26px;
+  color: var(--hud-accent);
+  text-shadow: 0 0 12px rgba(255,213,79,0.6);
+  letter-spacing: 2px;
+}
+
+.status-pill {
+  display: flex; align-items: center; gap: 5px;
+  padding: 3px 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.header-status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--hud-red); flex-shrink: 0;
+}
+.header-status-dot.online {
+  background: var(--hud-green);
+  box-shadow: 0 0 6px var(--hud-green);
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; } 50% { opacity: 0.5; }
+}
+
+.header-center { flex: 1; display: flex; justify-content: center; }
+
+.group-filter {
+  display: flex; gap: 3px;
+  background: rgba(0,0,0,0.3);
+  padding: 3px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.filter-btn {
+  padding: 4px 14px; border: none; background: transparent;
+  color: var(--text-secondary); border-radius: 5px; cursor: pointer;
+  font-size: 12px; font-weight: 600;
+  font-family: 'Noto Sans SC', sans-serif;
+  transition: all 0.15s;
+}
+.filter-btn:hover { color: var(--text-primary); background: rgba(255,255,255,0.08); }
+.filter-btn.active { background: var(--hud-accent); color: #1a1000; }
+
+.header-right { display: flex; gap: 16px; align-items: center; }
+.header-right .stat {
+  font-family: 'VT323', monospace;
+  font-size: 16px; letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
+.lang-btn {
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.25);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'VT323', monospace;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.lang-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+
+/* ===== 底部工具条 ===== */
+.bottom-toolbar {
+  height: 36px;
+  background: rgba(10,20,35,0.95);
+  border-top: 1px solid rgba(255,220,120,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 0 20px;
+  position: relative;
+}
+.toolbar-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.toolbar-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'Noto Sans SC', sans-serif;
+}
+.toolbar-value {
+  font-family: 'VT323', monospace;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+.toolbar-dim { color: var(--text-muted); }
+.toolbar-divider {
+  width: 1px; height: 16px;
+  background: rgba(255,255,255,0.12);
+}
+
+/* ===== 底部工具条 - 分组筛选 ===== */
+.toolbar-group-filter {
+  display: flex; gap: 2px;
+  align-items: center;
+}
+.toolbar-filter-btn {
+  padding: 3px 10px;
+  border: none;
+  background: rgba(255,255,255,0.06);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'Noto Sans SC', sans-serif;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.toolbar-filter-btn:hover { background: rgba(255,255,255,0.12); color: var(--text-primary); }
+.toolbar-filter-btn.active { background: var(--hud-accent); color: #1a1000; }
+.toolbar-add-group {
+  width: 22px; padding: 3px 0;
+  background: rgba(255,255,255,0.1);
+}
+
+/* ===== 分组管理面板 ===== */
+.group-panel {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  background: rgba(10,20,35,0.98);
+  border: 1px solid rgba(255,220,120,0.25);
+  border-radius: 10px;
+  padding: 12px;
+  min-width: 200px;
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.5);
+  z-index: 200;
+}
+.group-panel-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+.group-panel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+.group-panel-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.04);
+}
+.group-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.group-name {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+.group-del-btn {
+  background: none; border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+.group-del-btn:hover { background: rgba(255,82,82,0.2); color: var(--hud-red); }
+
+.group-panel-add {
+  display: flex; gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.group-input {
+  flex: 1;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 5px;
+  padding: 5px 8px;
+  color: var(--text-primary);
+  font-size: 12px;
+  outline: none;
+}
+.group-input:focus { border-color: rgba(255,220,120,0.4); }
+.group-add-btn {
+  width: 28px; height: 28px;
+  border: none; background: var(--hud-accent);
+  color: #1a1000; border-radius: 5px;
+  font-size: 16px; font-weight: bold;
+  cursor: pointer;
+}
+
+/* ===== 场景容器 ===== */
+.scene {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  transition: --sky-top 2s, --sky-mid 2s, --sky-bottom 2s;
+}
+
+/* ===== 星星 ===== */
+.star {
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 4px rgba(255,255,255,0.8);
+  animation: star-twinkle 2s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes star-twinkle {
+  from { opacity: 0.3; transform: scale(0.8); }
+  to   { opacity: 1;   transform: scale(1.2); }
+}
+
+/* ===== 流星 ===== */
+.meteor {
+  position: absolute;
+  width: 120px;
+  height: 2px;
+  background: linear-gradient(-90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.95) 100%);
+  border-radius: 2px;
+  pointer-events: none;
+  animation: meteor-fly 2.2s ease-in forwards;
+  transform: rotate(-20deg);
+}
+
+@keyframes meteor-fly {
+  from { transform: rotate(-20deg) translateX(0);     opacity: 1; }
+  80%  { opacity: 0.8; }
+  to   { transform: rotate(-20deg) translateX(-130vw); opacity: 0; }
+}
+
+/* ===== 飞机 ===== */
+.plane {
+  position: absolute;
+  font-size: 20px;
+  pointer-events: none;
+  animation: plane-fly 6s linear forwards;
+  white-space: nowrap;
+}
+.plane::before { content: '✈️'; }
+
+/* 从左到右 */
+.plane.ltr {
+  animation-name: plane-fly-ltr;
+}
+/* 从右到左 */
+.plane.rtl {
+  animation-name: plane-fly-rtl;
+}
+
+@keyframes plane-fly-ltr {
+  from { left: -5%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  to   { left: 105%; opacity: 0; }
+}
+
+@keyframes plane-fly-rtl {
+  from { right: -5%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  to   { right: 105%; opacity: 0; }
+}
+
+/* ===== 天空层（固定 120px）===== */
+.sky-layer {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 120px;
+  background: linear-gradient(180deg,
+    var(--sky-top) 0%,
+    var(--sky-mid) 60%,
+    var(--sky-bottom) 100%
+  );
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 60px;
+  padding: 0 80px;
+}
+
+.cloud {
+  opacity: 0.55;
+  flex-shrink: 0;
+  animation: cloud-drift linear infinite alternate;
+}
+
+@keyframes cloud-drift {
+  from { transform: translateX(-14px); }
+  to   { transform: translateX(14px); }
+}
+
+/* ===== 墙面层（固定 240px）===== */
+.wall-layer {
+  position: absolute;
+  top: 120px; left: 0; right: 0;
+  height: 240px;
+  background: var(--wall-color);
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  align-items: center;
+  padding: 0 80px;
+  box-shadow: inset 0 -4px 0 var(--wall-dark);
+  z-index: 3;
+}
+
+/* 窗户 */
+.office-window {
+  font-size: 88px;
+  line-height: 1;
+  display: inline-block;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.office-window::before {
+  content: '';
+  position: absolute;
+  top: 12%;
+  left: 19%;
+  right: 19%;
+  bottom: 12%;
+  background: var(--sky-bottom);
+  border-radius: 2px;
+  z-index: -1;
+}
+
+/* ===== 地板层（剩余空间）===== */
+.floor-layer {
+  position: absolute;
+  top: 360px; left: 0; right: 0; bottom: 0;
+  background: var(--floor-color);
+  background-image:
+    repeating-linear-gradient(90deg,
+      transparent, transparent 29px,
+      rgba(0,0,0,0.12) 29px, rgba(0,0,0,0.12) 60px
+    ),
+    repeating-linear-gradient(0deg,
+      transparent, transparent 29px,
+      rgba(0,0,0,0.12) 29px, rgba(0,0,0,0.12) 60px
+    );
+  transform-origin: top center;
+  transform: perspective(500px) rotateX(35deg);
+  transform-style: preserve-3d;
+}
+
+/* 墙角装饰物 — flex 子项，与窗户同一容器 */
+.wall-decor {
+  align-self: flex-end;
+  margin-bottom: -16px;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
+  line-height: 1;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.wall-decor-left  { font-size: 36px; margin-left: -65px; }
+.wall-decor-right { font-size: 52px; }
+.wall-door        { font-size: 144px; align-self: flex-end; margin-bottom: 7px; filter: none; }
+
+/* 墙上时钟 — 液晶屏风格 */
+.wall-clock {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0e0a02;
+  border: 2px solid #3a2a10;
+  border-radius: 5px;
+  padding: 4px 12px;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 10px rgba(0,0,0,0.6),
+    0 2px 8px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  white-space: nowrap;
+  width: 113px;
+  height: 52px;
+  box-sizing: border-box;
+}
+
+.wall-clock-time {
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  font-weight: 400;
+  color: #ffb300;
+  text-shadow:
+    0 0 6px rgba(255,179,0,0.9),
+    0 0 14px rgba(255,179,0,0.4);
+  letter-spacing: 2px;
+  font-variant-numeric: tabular-nums;
+  width: 100%;
+  text-align: center;
+}
+
+.wall-clock-date {
+  font-family: 'VT323', monospace;
+  font-size: 12px;
+  font-weight: 400;
+  color: #c47a00;
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px rgba(196,122,0,0.6);
+}
+
+/* 公告栏 — flex 子项 */
+.wall-board {
+  align-self: center;
+  flex-shrink: 0;
+  width: 80px;
+  background: #f5e6c8;
+  border: 2px solid var(--wall-dark);
+  border-radius: 4px;
+  padding: 6px 8px;
+  pointer-events: none;
+}
+
+.wall-board-title {
+  font-size: 10px;
+  color: #5a3e28;
+  font-weight: 700;
+  margin-bottom: 5px;
+  white-space: nowrap;
+}
+
+.wall-board-line {
+  height: 2px;
+  background: #c4a882;
+  border-radius: 1px;
+  margin-bottom: 4px;
+}
+
+.wall-board-line.short { width: 60%; }
+
+/* ===== 工位网格 — 固定距墙面位置 ===== */
+.grid-center {
+  position: absolute;
+  top: 290px;
+  left: 0; right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 10;
+  padding: 0 40px;
+}
+
+.office-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px 20px;
+  justify-content: center;
+  max-width: 1200px;
+}
+
+/* ===== 工位包装器 ===== */
+.agent-wrapper { position: relative; }
+
+/* ===== 删除确认弹窗 ===== */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.confirm-dialog {
+  background: rgba(10,20,35,0.98);
+  border: 1px solid rgba(255,220,120,0.3);
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 240px;
+  text-align: center;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+}
+.confirm-title {
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  color: var(--hud-accent);
+  margin-bottom: 12px;
+}
+.confirm-msg {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+.confirm-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.confirm-cancel, .confirm-ok {
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+}
+.confirm-cancel {
+  background: rgba(255,255,255,0.1);
+  color: var(--text-secondary);
+}
+.confirm-cancel:hover { background: rgba(255,255,255,0.15); }
+.confirm-ok {
+  background: var(--hud-red);
+  color: #fff;
+}
+.confirm-ok:hover { opacity: 0.85; }

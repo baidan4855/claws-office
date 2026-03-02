@@ -1,0 +1,280 @@
+/* ===== 像素工位 ===== */
+.pixel-desk {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 110px;
+  position: relative;
+  cursor: default;
+  transition: transform 0.2s;
+}
+
+.pixel-desk:hover {
+  transform: translateY(-4px);
+}
+
+/* ===== 角色 ===== */
+.pixel-character {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  position: relative;
+  z-index: 0;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5));
+  margin-bottom: -16px;
+}
+
+.pixel-character.working {
+  animation: char-bounce 0.55s ease-in-out infinite alternate;
+}
+
+@keyframes char-bounce {
+  from { transform: translateY(0px); }
+  to   { transform: translateY(-7px); }
+}
+
+/* 工作状态光晕 */
+.pixel-character.working::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 8px;
+  background: radial-gradient(ellipse, rgba(79,195,247,0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: shadow-pulse 0.55s ease-in-out infinite alternate;
+}
+
+@keyframes shadow-pulse {
+  from { opacity: 0.6; transform: translateX(-50%) scaleX(1); }
+  to   { opacity: 0.2; transform: translateX(-50%) scaleX(0.7); }
+}
+
+/* 工作 ping 点 */
+.work-ping {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--hud-green);
+  animation: ping-anim 1.5s ease-in-out infinite;
+}
+
+@keyframes ping-anim {
+  0%   { transform: scale(1); opacity: 1; }
+  70%  { transform: scale(2); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+/* ===== 显示器 ===== */
+.pixel-monitor-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.pixel-monitor {
+  width: 62px;
+  height: 42px;
+  background: var(--monitor-idle);
+  border: 2px solid #455a64;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.4s, border-color 0.4s, box-shadow 0.4s;
+}
+
+.pixel-monitor.active {
+  border-color: var(--mc, #4fc3f7);
+  box-shadow:
+    0 0 10px var(--mc, #4fc3f7),
+    inset 0 0 10px rgba(79,195,247,0.15);
+}
+
+.monitor-text {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+  z-index: 1;
+  letter-spacing: 1px;
+}
+
+.pixel-monitor.active .monitor-text {
+  color: var(--mc, #4fc3f7);
+  text-shadow: 0 0 6px var(--mc, #4fc3f7);
+}
+
+/* 扫描线动效 */
+.monitor-scan {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,255,255,0.06) 50%,
+    transparent 100%
+  );
+  animation: scan-anim 2.5s linear infinite;
+}
+
+@keyframes scan-anim {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+/* 显示器底座 */
+.monitor-neck {
+  width: 8px;
+  height: 6px;
+  background: #37474f;
+}
+
+.monitor-foot {
+  width: 20px;
+  height: 3px;
+  background: #37474f;
+  border-radius: 2px;
+}
+
+/* ===== 桌面 ===== */
+.pixel-desk-top {
+  width: 80px;
+  height: 10px;
+  background: linear-gradient(180deg, var(--desk-highlight) 0%, var(--desk-top) 100%);
+  border-radius: 3px 3px 0 0;
+  border-top: 2px solid #d4a574;
+  margin-top: 1px;
+  position: relative;
+}
+
+/* 桌上小物件 */
+.pixel-desk-top::before {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: -6px;
+  width: 6px;
+  height: 6px;
+  background: #8d6e63;
+  border-radius: 50% 50% 0 0;
+  border: 1px solid #6d4c41;
+}
+
+.pixel-desk-side {
+  width: 80px;
+  height: 6px;
+  background: var(--desk-side);
+  border-radius: 0 0 3px 3px;
+}
+
+/* 桌腿 */
+.pixel-desk-legs {
+  display: flex;
+  justify-content: space-between;
+  width: 68px;
+  position: relative;
+}
+
+.pixel-desk-leg {
+  width: 5px;
+  height: 14px;
+  background: var(--desk-side);
+  border-radius: 0 0 2px 2px;
+}
+
+/* 落地阴影 */
+.pixel-desk-legs::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 8px;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.35) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+/* ===== 名牌 ===== */
+.pixel-nameplate {
+  margin-top: 6px;
+  background: rgba(10,20,35,0.75);
+  border: 1px solid var(--hud-border);
+  border-radius: 4px;
+  padding: 3px 8px;
+  text-align: center;
+  max-width: 108px;
+}
+
+.pixel-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--hud-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 92px;
+  display: block;
+}
+
+.pixel-status-text {
+  font-size: 10px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 92px;
+  display: block;
+  margin-top: 1px;
+}
+
+.pixel-status-text.active {
+  color: var(--hud-green);
+}
+
+/* ===== 悬浮任务气泡 ===== */
+.task-bubble {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10,20,35,0.92);
+  border: 1px solid var(--hud-border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 11px;
+  color: var(--hud-text);
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 20;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+
+.task-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--hud-border);
+}
+
+.pixel-desk:hover .task-bubble {
+  opacity: 1;
+}

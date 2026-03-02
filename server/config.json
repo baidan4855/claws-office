@@ -1,0 +1,53 @@
+{
+  "groups": [
+    {
+      "id": "test",
+      "name": "test",
+      "color": "#6b7280"
+    }
+  ],
+  "agents": [
+    {
+      "id": "main",
+      "name": "Main Agent",
+      "avatar": "👨",
+      "color": "#00f5ff",
+      "group": ""
+    },
+    {
+      "id": "advisor",
+      "name": "advisor",
+      "avatar": "👨",
+      "color": "#22c55e",
+      "group": ""
+    },
+    {
+      "id": "coder",
+      "name": "coder",
+      "avatar": "🧝",
+      "color": "#a855f7",
+      "group": ""
+    },
+    {
+      "id": "architect",
+      "name": "architect",
+      "avatar": "👩‍🚀",
+      "color": "#eab308",
+      "group": ""
+    },
+    {
+      "id": "researcher",
+      "name": " researcher",
+      "avatar": "🧓",
+      "color": "#ec4899",
+      "group": ""
+    },
+    {
+      "id": "reviewer",
+      "name": "reviewer",
+      "avatar": "🦹‍♂️",
+      "color": "#f97316",
+      "group": ""
+    }
+  ]
+}
