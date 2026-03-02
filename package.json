@@ -1,6 +1,6 @@
 {
   "name": "claws-office",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Real-time monitoring dashboard for OpenClaw agents with an office-themed UI",
   "type": "module",
   "bin": {
