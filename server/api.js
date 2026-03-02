@@ -18,11 +18,23 @@ const CONFIG_FILE = path.join(__dirname, 'config.json');
 const SESSIONS_DIR =
   process.env.OPENCLAW_SESSIONS_DIR || path.join(os.homedir(), '.openclaw', 'agents');
 const IDLE_THRESHOLD = 15000;
+const DEFAULT_AGENT_AVATAR = '👨';
+const DEFAULT_AGENT_COLOR = '#4fc3f7';
 
 function getDefaultConfig() {
   return {
     groups: [],
     agents: [],
+  };
+}
+
+function createDefaultAgent(agentId) {
+  return {
+    id: agentId,
+    name: agentId,
+    avatar: DEFAULT_AGENT_AVATAR,
+    color: DEFAULT_AGENT_COLOR,
+    group: '',
   };
 }
 
@@ -41,8 +53,8 @@ function normalizeConfig(input) {
         .map(agent => ({
           id: agent.id,
           name: typeof agent.name === 'string' ? agent.name : agent.id,
-          avatar: typeof agent.avatar === 'string' ? agent.avatar : '👨',
-          color: typeof agent.color === 'string' ? agent.color : '#4fc3f7',
+          avatar: typeof agent.avatar === 'string' ? agent.avatar : DEFAULT_AGENT_AVATAR,
+          color: typeof agent.color === 'string' ? agent.color : DEFAULT_AGENT_COLOR,
           group:
             typeof agent.group === 'string' && validGroupIds.has(agent.group) ? agent.group : '',
         }))
@@ -79,7 +91,71 @@ function ensureAgentTracking(agentId) {
   }
 }
 
-for (const agent of config.agents) {
+function listDiscoveredAgentIds() {
+  try {
+    if (!fs.existsSync(SESSIONS_DIR)) return [];
+
+    const entries = fs.readdirSync(SESSIONS_DIR, { withFileTypes: true });
+    return entries
+      .filter(entry => entry.isDirectory())
+      .map(entry => entry.name)
+      .filter(agentId => {
+        const sessionsDir = path.join(SESSIONS_DIR, agentId, 'sessions');
+        try {
+          return fs.existsSync(sessionsDir) && fs.statSync(sessionsDir).isDirectory();
+        } catch {
+          return false;
+        }
+      })
+      .sort();
+  } catch {
+    return [];
+  }
+}
+
+function syncDiscoveredAgents() {
+  const discoveredAgentIds = listDiscoveredAgentIds();
+  const knownAgentIds = new Set(config.agents.map(agent => agent.id));
+  let changed = false;
+
+  for (const agentId of discoveredAgentIds) {
+    if (!knownAgentIds.has(agentId)) {
+      config.agents.push(createDefaultAgent(agentId));
+      ensureAgentTracking(agentId);
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    saveConfig(config);
+  }
+
+  return discoveredAgentIds;
+}
+
+function getTrackedAgents() {
+  const discoveredAgentIds = syncDiscoveredAgents();
+  if (discoveredAgentIds.length === 0) return [];
+
+  const configById = new Map(config.agents.map(agent => [agent.id, agent]));
+  return discoveredAgentIds.map(agentId => configById.get(agentId) || createDefaultAgent(agentId));
+}
+
+function ensureAgentConfig(agentId) {
+  const existingIndex = config.agents.findIndex(agent => agent.id === agentId);
+  if (existingIndex >= 0) return existingIndex;
+
+  const trackedAgents = getTrackedAgents();
+  if (!trackedAgents.some(agent => agent.id === agentId)) {
+    return -1;
+  }
+
+  config.agents.push(createDefaultAgent(agentId));
+  saveConfig(config);
+  return config.agents.length - 1;
+}
+
+for (const agent of getTrackedAgents()) {
   ensureAgentTracking(agent.id);
 }
 
@@ -255,9 +331,9 @@ function getDetailedStatus(session) {
   return 'working';
 }
 
-function getAllSessions() {
+function getAllSessions(trackedAgents = getTrackedAgents()) {
   const allSessions = [];
-  for (const agent of config.agents) {
+  for (const agent of trackedAgents) {
     const sessionsFile = path.join(SESSIONS_DIR, agent.id, 'sessions', 'sessions.json');
     try {
       if (!fs.existsSync(sessionsFile)) continue;
@@ -286,8 +362,8 @@ function formatWorkTime(ms) {
   return `${seconds}s`;
 }
 
-function buildAgents(sessions, groupFilter = null) {
-  let agents = config.agents.map(agentConfig => {
+function buildAgents(sessions, groupFilter = null, trackedAgents = getTrackedAgents()) {
+  let agents = trackedAgents.map(agentConfig => {
     ensureAgentTracking(agentConfig.id);
     const agentSessions = sessions.filter(session => session.agentId === agentConfig.id);
     const mostRecent =
@@ -323,8 +399,9 @@ function buildAgents(sessions, groupFilter = null) {
 }
 
 setInterval(() => {
-  const sessions = getAllSessions();
-  config.agents.forEach(agentConfig => {
+  const trackedAgents = getTrackedAgents();
+  const sessions = getAllSessions(trackedAgents);
+  trackedAgents.forEach(agentConfig => {
     ensureAgentTracking(agentConfig.id);
     const agentSessions = sessions.filter(session => session.agentId === agentConfig.id);
     const mostRecent =
@@ -353,8 +430,9 @@ function broadcastUpdate() {
   if (broadcastTimeout) clearTimeout(broadcastTimeout);
   broadcastTimeout = setTimeout(() => {
     try {
-      const sessions = getAllSessions();
-      const agents = buildAgents(sessions);
+      const trackedAgents = getTrackedAgents();
+      const sessions = getAllSessions(trackedAgents);
+      const agents = buildAgents(sessions, null, trackedAgents);
       const message = JSON.stringify({ type: 'update', agents });
       sseClients.forEach(client => {
         try {
@@ -372,8 +450,9 @@ app.get('/api/agents/stream', (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   const groupFilter = req.query.group || null;
-  const sessions = getAllSessions();
-  const agents = buildAgents(sessions, groupFilter);
+  const trackedAgents = getTrackedAgents();
+  const sessions = getAllSessions(trackedAgents);
+  const agents = buildAgents(sessions, groupFilter, trackedAgents);
 
   res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`);
   res.write(`data: ${JSON.stringify({ type: 'update', agents })}\n\n`);
@@ -388,13 +467,13 @@ app.get('/api/agents/stream', (req, res) => {
 });
 
 app.get('/api/config', (req, res) => {
-  res.json({ groups: config.groups, agents: config.agents });
+  res.json({ groups: config.groups, agents: getTrackedAgents() });
 });
 
 app.post('/api/config/agent/:id/group', (req, res) => {
   const { group } = req.body;
   const agentId = req.params.id;
-  const idx = config.agents.findIndex(agent => agent.id === agentId);
+  const idx = ensureAgentConfig(agentId);
   if (idx >= 0 && config.groups.find(item => item.id === group)) {
     config.agents[idx].group = group;
     saveConfig(config);
@@ -408,7 +487,7 @@ app.post('/api/config/agent/:id/group', (req, res) => {
 app.post('/api/config/agent/:id', (req, res) => {
   const { name, avatar } = req.body;
   const agentId = req.params.id;
-  const idx = config.agents.findIndex(agent => agent.id === agentId);
+  const idx = ensureAgentConfig(agentId);
   if (idx < 0) {
     res.status(404).json({ error: 'Agent not found' });
     return;
@@ -454,9 +533,10 @@ app.delete('/api/groups/:id', (req, res) => {
 
 app.get('/api/agents', (req, res) => {
   const groupFilter = req.query.group || null;
-  const sessions = getAllSessions();
+  const trackedAgents = getTrackedAgents();
+  const sessions = getAllSessions(trackedAgents);
   res.json({
-    agents: buildAgents(sessions, groupFilter),
+    agents: buildAgents(sessions, groupFilter, trackedAgents),
     groups: config.groups,
     source: 'openclaw',
     timestamp: new Date().toISOString(),
