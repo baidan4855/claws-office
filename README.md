@@ -1,4 +1,13 @@
-# Claws Office
+# 🏢 Claws Office
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![Node.js >=20.0.0](https://img.shields.io/badge/Node.js-%3E%3D20.0.0-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Docker >=20.0.0](https://img.shields.io/badge/Docker-%3E%3D20.0.0-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![GitHub stars](https://img.shields.io/github/stars/baidan4855/claws-office?style=for-the-badge)](https://github.com/baidan4855/claws-office/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/baidan4855/claws-office?style=for-the-badge)](https://github.com/baidan4855/claws-office/issues)
+
+Built collaboratively with **OpenAI Codex**, **Claude Code**, and **OpenClaw**.  
+本项目由 **OpenAI Codex**、**Claude Code** 与 **OpenClaw** 协作开发。
 
 A real-time monitoring dashboard for OpenClaw agents with an office-themed UI.
 
@@ -14,9 +23,8 @@ A real-time monitoring dashboard for OpenClaw agents with an office-themed UI.
 
 ## Screenshot
 
-<!-- Add your screenshot here -->
-![Claws Office Screenshot](docs/main-ui.png)
-![Claws Office 截图](docs/edit-modal.png)
+![Claws Office Screenshot](https://raw.githubusercontent.com/baidan4855/claws-office/main/docs/main-ui.png)
+![Claws Office Screenshot](https://raw.githubusercontent.com/baidan4855/claws-office/main/docs/edit-modal.png)
 
 ## Tech Stack
 
@@ -26,10 +34,29 @@ A real-time monitoring dashboard for OpenClaw agents with an office-themed UI.
 - Server-Sent Events (real-time updates)
 - CSS3 (gradients, perspective effects)
 
-## Quick Start (npm)
+## Quick Start
 
 ```bash
-# Install dependencies
+# One-command start (recommended)
+OPENCLAW_SESSIONS_DIR="$HOME/.openclaw/agents" PORT=3000 npx claws-office
+```
+
+```bash
+# One-command start via Docker
+mkdir -p ./claws-office-data
+test -f ./claws-office-data/config.json || printf '{\n  "groups": [],\n  "agents": []\n}\n' > ./claws-office-data/config.json
+docker run -d \
+  -p 3000:3000 \
+  -e NODE_ENV=production \
+  -e OPENCLAW_SESSIONS_DIR=/data/openclaw/agents \
+  -v "$HOME/.openclaw:/data/openclaw:ro" \
+  -v "$PWD/claws-office-data/config.json:/app/server/config.json" \
+  --name claws-office \
+  jack85/claws-office:latest
+```
+
+```bash
+# From source
 npm install
 
 # Development
@@ -40,15 +67,40 @@ npm run build
 npm start
 ```
 
+## Runtime Configuration
+
+This project is a dashboard only. Agent sessions are read from OpenClaw session files.
+It does not create or delete agents by itself.
+
+| Variable                | Default              | Description                                       |
+| ----------------------- | -------------------- | ------------------------------------------------- |
+| `PORT`                  | `3000`               | HTTP server port for both frontend and backend    |
+| `NODE_ENV`              | `development`        | Set to `production` to serve `dist` static assets |
+| `OPENCLAW_SESSIONS_DIR` | `~/.openclaw/agents` | Root directory of OpenClaw agent sessions         |
+
+## Quality Checks
+
+```bash
+npm run lint
+npm run build
+```
+
 ## Docker
 
 ```bash
-# Build image
-docker build -t claws-office .
-
-# Run container
-docker run -d -p 3000:3000 --name claws-office claws-office
+docker run -d \
+  -p 3000:3000 \
+  -e NODE_ENV=production \
+  -e OPENCLAW_SESSIONS_DIR=/data/openclaw/agents \
+  -v "$HOME/.openclaw:/data/openclaw:ro" \
+  -v "$PWD/claws-office-data/config.json:/app/server/config.json" \
+  --name claws-office \
+  jack85/claws-office:latest
 ```
+
+Before first run, make sure `./claws-office-data/config.json` exists.
+If you do not mount `~/.openclaw`, the container cannot read host agent sessions.
+If you do not mount `config.json`, group/agent display settings will be reset after container recreation.
 
 Visit http://localhost:3000
 
@@ -63,8 +115,7 @@ Visit http://localhost:3000
 │   ├── App.css                   # Main styles
 │   └── index.css                 # Global styles
 ├── server/
-│   ├── index.js                  # Dev backend API server
-│   └── prod.js                   # Production server
+│   └── api.js                    # Unified backend + frontend HTTP server
 ├── Dockerfile
 └── README.md
 ```
@@ -74,7 +125,7 @@ Visit http://localhost:3000
 - `GET /api/config` — Get groups and agent config
 - `GET /api/agents` — Get all agent statuses
 - `GET /api/agents/stream` — SSE real-time updates
-- `POST /api/config/agent/:id` — Update agent info
+- `POST /api/config/agent/:id` — Update agent display info (name/avatar/group)
 - `POST /api/config/agent/:id/group` — Update agent group
 - `POST /api/groups` — Add group
 - `DELETE /api/groups/:id` — Delete group
@@ -97,13 +148,32 @@ Visit http://localhost:3000
 
 ## 截图
 
-<!-- 在此添加截图 -->
-<!-- ![Claws Office 截图](docs/main-ui.png) -->
+![Claws Office 截图](https://raw.githubusercontent.com/baidan4855/claws-office/main/docs/main-ui.png)
+![Claws Office 截图](https://raw.githubusercontent.com/baidan4855/claws-office/main/docs/edit-modal.png)
 
-## 快速开始 (npm)
+## 快速开始
 
 ```bash
-# 安装依赖
+# 一条命令启动（推荐）
+OPENCLAW_SESSIONS_DIR="$HOME/.openclaw/agents" PORT=3000 npx claws-office
+```
+
+```bash
+# 使用 Docker 一键启动
+mkdir -p ./claws-office-data
+test -f ./claws-office-data/config.json || printf '{\n  "groups": [],\n  "agents": []\n}\n' > ./claws-office-data/config.json
+docker run -d \
+  -p 3000:3000 \
+  -e NODE_ENV=production \
+  -e OPENCLAW_SESSIONS_DIR=/data/openclaw/agents \
+  -v "$HOME/.openclaw:/data/openclaw:ro" \
+  -v "$PWD/claws-office-data/config.json:/app/server/config.json" \
+  --name claws-office \
+  jack85/claws-office:latest
+```
+
+```bash
+# 从源码运行
 npm install
 
 # 开发模式
@@ -114,15 +184,40 @@ npm run build
 npm start
 ```
 
+## 运行配置
+
+本项目本质是看板。Agent 数据来源于 OpenClaw 会话文件，
+项目本身不会创建或删除 Agent。
+
+| 变量                    | 默认值               | 说明                                     |
+| ----------------------- | -------------------- | ---------------------------------------- |
+| `PORT`                  | `3000`               | 前后端同一个 HTTP 服务端口               |
+| `NODE_ENV`              | `development`        | 设为 `production` 时托管 `dist` 静态文件 |
+| `OPENCLAW_SESSIONS_DIR` | `~/.openclaw/agents` | OpenClaw Agent 会话目录根路径            |
+
+## 质量检查
+
+```bash
+npm run lint
+npm run build
+```
+
 ## Docker
 
 ```bash
-# 构建镜像
-docker build -t claws-office .
-
-# 运行容器
-docker run -d -p 3000:3000 --name claws-office claws-office
+docker run -d \
+  -p 3000:3000 \
+  -e NODE_ENV=production \
+  -e OPENCLAW_SESSIONS_DIR=/data/openclaw/agents \
+  -v "$HOME/.openclaw:/data/openclaw:ro" \
+  -v "$PWD/claws-office-data/config.json:/app/server/config.json" \
+  --name claws-office \
+  jack85/claws-office:latest
 ```
+
+首次运行前请确保宿主机存在 `./claws-office-data/config.json`。
+如果不挂载 `~/.openclaw`，容器内将无法读取宿主机上的 agent 会话状态。
+如果不挂载 `config.json`，重建容器后分组和展示配置会被重置。
 
 访问 http://localhost:3000
 
@@ -137,8 +232,7 @@ docker run -d -p 3000:3000 --name claws-office claws-office
 │   ├── App.css                   # 主样式
 │   └── index.css                 # 全局样式
 ├── server/
-│   ├── index.js                  # 开发环境后端
-│   └── prod.js                   # 生产环境服务器
+│   └── api.js                    # 统一前后端 HTTP 服务
 ├── Dockerfile
 └── README.md
 ```
@@ -148,7 +242,7 @@ docker run -d -p 3000:3000 --name claws-office claws-office
 - `GET /api/config` — 获取分组和员工配置
 - `GET /api/agents` — 获取所有 Agent 状态
 - `GET /api/agents/stream` — SSE 实时推送
-- `POST /api/config/agent/:id` — 更新员工信息
+- `POST /api/config/agent/:id` — 更新展示信息（名称/头像/分组）
 - `POST /api/config/agent/:id/group` — 更新员工分组
 - `POST /api/groups` — 添加分组
 - `DELETE /api/groups/:id` — 删除分组

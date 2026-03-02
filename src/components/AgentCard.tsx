@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Translations } from '../i18n'
 
 interface Agent {
   id: string
@@ -15,25 +16,15 @@ interface Agent {
 interface AgentCardProps {
   agent: Agent
   index: number
+  t: Translations
 }
 
-// Extended status config with all new statuses
-const statusConfig: Record<string, { label: string; color: string; icon: string }> = {
-  idle: { label: '空闲', color: '#94a3b8', icon: '💤' },
-  thinking: { label: '思考中', color: '#00f5ff', icon: '🤔' },
-  working: { label: '工作中', color: '#22c55e', icon: '⚡' },
-  waiting: { label: '等待中', color: '#eab308', icon: '⏳' },
-  researching: { label: '正在查询资料', color: '#06b6d4', icon: '🔍' },
-  coding: { label: '正在写代码', color: '#a855f7', icon: '💻' },
-  testing: { label: '正在测试某个功能', color: '#f97316', icon: '🧪' },
-  debugging: { label: '正在排查问题', color: '#ef4444', icon: '🔧' },
-  reporting: { label: '正在准备汇报进度', color: '#ec4899', icon: '📋' }
-}
+import { statusConfig } from '../i18n'
 
-export default function AgentCard({ agent, index }: AgentCardProps) {
+export default function AgentCard({ agent, index, t }: AgentCardProps) {
   const config = statusConfig[agent.status] || statusConfig.working
   // Use statusText from API if available, otherwise fall back to config
-  const displayLabel = agent.statusText || config.label
+  const displayLabel = agent.statusText || t.statusMap[agent.status] || config.label
 
   return (
     <motion.div
@@ -90,7 +81,7 @@ export default function AgentCard({ agent, index }: AgentCardProps) {
             animate={{ opacity: 1, x: 0 }}
             key="current"
           >
-            <span className="task-label">当前任务</span>
+            <span className="task-label">{t.currentTask}</span>
             <span className="task-content">{agent.currentTask}</span>
             {agent.status === 'working' && (
               <motion.div 
@@ -111,14 +102,14 @@ export default function AgentCard({ agent, index }: AgentCardProps) {
             transition={{ delay: 0.1 }}
             key="next"
           >
-            <span className="task-label">下一步</span>
+            <span className="task-label">{t.nextStep}</span>
             <span className="task-content">{agent.nextTask}</span>
           </motion.div>
         )}
 
         {!agent.currentTask && !agent.nextTask && (
           <div className="task idle-task">
-            <span className="task-content">等待新任务...</span>
+            <span className="task-content">{t.waitingForTasks}</span>
           </div>
         )}
       </div>
@@ -142,7 +133,7 @@ export default function AgentCard({ agent, index }: AgentCardProps) {
             >
               ⟳
             </motion.div>
-            <span className="last-seen">活跃</span>
+            <span className="last-seen">{t.active}</span>
           </>
         )}
       </div>

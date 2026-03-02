@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import WorkstationCard from './components/WorkstationCard'
 import AgentEditPanel from './components/AgentEditPanel'
+import { getTranslations, type Lang } from './i18n'
 import './App.css'
 
 interface Agent {
@@ -9,42 +10,8 @@ interface Agent {
   group: string; avatar: string; color: string; workTime: string
   workTimeMs: number; currentTask: string | null; currentTaskIcon: string | null
 }
-interface Group { id: string; name: string; color: string }
-
-type Lang = 'zh' | 'en'
-
-const T = {
-  zh: {
-    title: '🏢 CLAWS OFFICE',
-    live: '实时', offline: '离线',
-    all: '全部',
-    active: '活跃', total: '总计',
-    agents: '员工', workTime: '工时',
-    groups: '分组', addGroup: '添加分组', editGroup: '编辑', deleteGroup: '删除',
-    statusMap: {
-      idle: '空闲', thinking: '思考中', working: '工作中',
-      researching: '查阅资料', coding: '写代码',
-      testing: '测试中', debugging: '排查问题', reporting: '汇报进度'
-    },
-    editTitle: '编辑员工', name: '姓名', group: '组别', avatar: '头像', save: '保存',
-    bulletin: '📋 公告',
-  },
-  en: {
-    title: '🏢 CLAWS OFFICE',
-    live: 'Live', offline: 'Offline',
-    all: 'All',
-    active: 'Active', total: 'Total',
-    agents: 'Agents', workTime: 'Work Time',
-    groups: 'Groups', addGroup: 'Add Group', editGroup: 'Edit', deleteGroup: 'Delete',
-    statusMap: {
-      idle: 'Idle', thinking: 'Thinking', working: 'Working',
-      researching: 'Researching', coding: 'Coding',
-      testing: 'Testing', debugging: 'Debugging', reporting: 'Reporting'
-    },
-    editTitle: 'Edit Agent', name: 'Name', group: 'Group', avatar: 'Avatar', save: 'Save',
-    bulletin: '📋 Board',
-  }
-}
+interface Group { id: string; name: string }
+type StreamMessage = { type: string; agents?: Agent[] }
 
 function App() {
   const [agents, setAgents] = useState<Agent[]>([])
@@ -61,7 +28,7 @@ function App() {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const eventSourceRef = useRef<EventSource | null>(null)
   const skyObjId = useRef(0)
-  const t = T[lang]
+  const t = useMemo(() => getTranslations(lang), [lang])
 
   // 分组管理
   const handleAddGroup = async () => {
@@ -108,21 +75,21 @@ function App() {
         eventSourceRef.current = es
         es.onmessage = (e) => {
           try {
-            const data = JSON.parse(e.data)
+            const data = JSON.parse(e.data) as StreamMessage
             if (data.type === 'connected' || data.type === 'update') setIsConnected(true)
             if (data.type === 'update' && data.agents) {
-              const processed = data.agents.map((a: any) => ({
+              const processed = data.agents.map(a => ({
                 ...a, name: a.name || a.id,
                 statusText: t.statusMap[a.status as keyof typeof t.statusMap] || t.statusMap.working
               }))
-              setAgents(prev => processed.map((a: any) => {
+              setAgents(prev => processed.map(a => {
                 const existing = prev.find(p => p.id === a.id)
                 // 保留本地修改的 name/avatar，避免被 SSE 覆盖
                 return existing
                   ? { ...a, name: existing.name, avatar: existing.avatar }
                   : a
               }))
-              setTotalWorkTime(processed.reduce((s: number, a: any) => s + (a.workTimeMs || 0), 0))
+              setTotalWorkTime(processed.reduce((s, a) => s + (a.workTimeMs || 0), 0))
             }
           } catch {}
         }
@@ -131,7 +98,7 @@ function App() {
     }
     connectSSE()
     return () => { eventSourceRef.current?.close() }
-  }, [selectedGroup])
+  }, [selectedGroup, t])
 
   const handleSaveAgent = async (agentId: string, changes: { name?: string; avatar?: string; group?: string }) => {
     if (changes.group) {
@@ -153,7 +120,11 @@ function App() {
 
   const formatTime = (ms: number) => {
     const m = Math.floor(ms / 60000), h = Math.floor(m / 60)
-    return h > 0 ? `${h}h${m % 60}m` : m > 0 ? `${m}m` : `${Math.floor(ms / 1000)}s`
+    return h > 0
+      ? `${h}${t.hourUnit}${m % 60}${t.minuteUnit}`
+      : m > 0
+      ? `${m}${t.minuteUnit}`
+      : `${Math.floor(ms / 1000)}${t.secondUnit}`
   }
 
   const hour = now.getHours()
@@ -229,7 +200,7 @@ function App() {
         </div>
         <div className="header-right">
           <button className="lang-btn" onClick={() => setLang(l => l === 'zh' ? 'en' : 'zh')}>
-            {lang === 'zh' ? 'EN' : '中文'}
+            {t.langSwitch}
           </button>
         </div>
       </header>
@@ -301,7 +272,7 @@ function App() {
           {/* 时钟保持绝对定位居中 */}
           <div className="wall-clock">
             <div className="wall-clock-time">
-              {now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+              {`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`}
             </div>
             <div className="wall-clock-date">
               {now.toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', { month: '2-digit', day: '2-digit', weekday: 'short' })}
@@ -318,7 +289,7 @@ function App() {
             <AnimatePresence mode="popLayout">
               {agents.map((agent, index) => (
                 <div key={agent.id} className="agent-wrapper">
-                  <WorkstationCard agent={agent} index={index} onEdit={() => setEditingAgent(agent.id)} />
+                  <WorkstationCard agent={agent} index={index} onEdit={() => setEditingAgent(agent.id)} t={t} />
                 </div>
               ))}
             </AnimatePresence>
@@ -370,7 +341,7 @@ function App() {
             onClick={() => setSelectedGroup(null)}>{t.all}</button>
           {groups.map(g => (
             <button key={g.id} className={`toolbar-filter-btn ${selectedGroup === g.id ? 'active' : ''}`}
-              onClick={() => setSelectedGroup(g.id)} style={{ borderLeftColor: g.color }}>{g.name}</button>
+              onClick={() => setSelectedGroup(g.id)}>{g.name}</button>
           ))}
           <button className="toolbar-filter-btn toolbar-add-group" onClick={() => setShowGroupPanel(!showGroupPanel)}>
             {showGroupPanel ? '✕' : '+'}
@@ -384,7 +355,7 @@ function App() {
             <div className="group-panel-list">
               {groups.map(g => (
                 <div key={g.id} className="group-panel-item">
-                  <span className="group-dot" style={{ background: g.color }} />
+                  <span className="group-dot" />
                   <span className="group-name">{g.name}</span>
                   <button className="group-del-btn" onClick={() => setConfirmDelete(g.id)}>✕</button>
                 </div>
@@ -402,16 +373,16 @@ function App() {
         {confirmDelete && (
           <div className="confirm-overlay" onClick={() => setConfirmDelete(null)}>
             <div className="confirm-dialog" onClick={e => e.stopPropagation()}>
-              <div className="confirm-title">{lang === 'zh' ? '确认删除' : 'Confirm Delete'}</div>
+              <div className="confirm-title">{t.confirmDelete}</div>
               <div className="confirm-msg">
-                {lang === 'zh' ? '确定要删除该分组吗？' : 'Delete this group?'}
+                {t.confirmDeleteMsg}
               </div>
               <div className="confirm-btns">
                 <button className="confirm-cancel" onClick={() => setConfirmDelete(null)}>
-                  {lang === 'zh' ? '取消' : 'Cancel'}
+                  {t.cancel}
                 </button>
                 <button className="confirm-ok" onClick={() => handleDeleteGroup(confirmDelete)}>
-                  {lang === 'zh' ? '删除' : 'Delete'}
+                  {t.delete}
                 </button>
               </div>
             </div>

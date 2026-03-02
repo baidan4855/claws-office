@@ -27,7 +27,14 @@ npm run dev
 - 使用 TypeScript 进行开发
 - 遵循 ESLint 和 Prettier 的代码风格
 - 组件采用函数式组件 + Hooks
-- 样式使用 CSS Modules 或 CSS-in-JS
+- 样式使用仓库内现有的普通 CSS 文件（`src/*.css`）
+
+## 提交前检查
+
+```bash
+npm run lint
+npm run build
+```
 
 ## 提交 Pull Request
 
@@ -72,7 +79,14 @@ npm run dev
 - Use TypeScript for development
 - Follow ESLint and Prettier code style
 - Use functional components with Hooks
-- Use CSS Modules or CSS-in-JS for styling
+- Follow the existing plain CSS approach in this repo (`src/*.css`)
+
+## Pre-PR Checks
+
+```bash
+npm run lint
+npm run build
+```
 
 ## Submitting Pull Requests
 

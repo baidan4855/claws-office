@@ -1,11 +1,15 @@
 {
   "name": "claws-office",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Real-time monitoring dashboard for OpenClaw agents with an office-themed UI",
   "type": "module",
+  "bin": {
+    "claws-office": "./bin/claws-office.js"
+  },
   "files": [
     "dist",
-    "server"
+    "server",
+    "bin"
   ],
   "repository": {
     "type": "git",
@@ -26,11 +30,15 @@
   },
   "homepage": "https://github.com/baidan4855/claws-office#readme",
   "scripts": {
-    "dev": "vite",
+    "dev": "node server/api.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .js,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.ts,.tsx --fix",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "start": "node server/prod.js",
-    "start:dev": "vite"
+    "start": "NODE_ENV=production node server/api.js",
+    "start:dev": "node server/api.js",
+    "check": "npm run lint && npm run build"
   },
   "dependencies": {
     "chokidar": "^5.0.0",
@@ -55,5 +63,5 @@
     "typescript": "^5.3.0",
     "vite": "^5.0.0"
   },
-  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
+  "packageManager": "npm@10.9.2"
 }

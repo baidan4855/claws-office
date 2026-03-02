@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Translations } from '../i18n'
 import './WorkstationCard.css'
 
 interface Agent {
@@ -16,6 +17,7 @@ interface Props {
   agent: Agent
   index: number
   onEdit: () => void
+  t: Translations
 }
 
 const STATUS_MONITOR_COLOR: Record<string, string> = {
@@ -30,22 +32,10 @@ const STATUS_MONITOR_COLOR: Record<string, string> = {
   waiting:     '#ffcc80',
 }
 
-const STATUS_MONITOR_TEXT: Record<string, string> = {
-  idle:        '---',
-  thinking:    '...',
-  working:     '</>',
-  coding:      '</>',
-  researching: '?!?',
-  debugging:   '!!!',
-  testing:     '✓✗',
-  reporting:   '|||',
-  waiting:     '~~~',
-}
-
-export default function WorkstationCard({ agent, index, onEdit }: Props) {
+export default function WorkstationCard({ agent, index, onEdit, t }: Props) {
   const isWorking = agent.status !== 'idle'
   const mc = STATUS_MONITOR_COLOR[agent.status] || '#4fc3f7'
-  const mt = STATUS_MONITOR_TEXT[agent.status] || '...'
+  const statusLabel = t.statusMap[agent.status as keyof typeof t.statusMap] || t.statusMap.working
 
   return (
     <motion.div
@@ -71,7 +61,7 @@ export default function WorkstationCard({ agent, index, onEdit }: Props) {
           className={`pixel-monitor ${isWorking ? 'active' : ''}`}
           style={{ '--mc': mc } as React.CSSProperties}
         >
-          <span className="monitor-text">{mt}</span>
+          <span className="monitor-text">{statusLabel}</span>
           {isWorking && <div className="monitor-scan" />}
         </div>
         <div className="monitor-neck" />

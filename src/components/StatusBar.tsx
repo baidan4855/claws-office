@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Translations } from '../i18n'
 import './StatusBar.css'
 
 interface StatusBarProps {
@@ -7,6 +8,7 @@ interface StatusBarProps {
   workingCount: number
   thinkingCount: number
   isConnected: boolean
+  t: Translations
 }
 
 export default function StatusBar({
@@ -14,7 +16,8 @@ export default function StatusBar({
   activeCount,
   workingCount,
   thinkingCount,
-  isConnected
+  isConnected,
+  t
 }: StatusBarProps) {
   return (
     <motion.header 
@@ -26,22 +29,22 @@ export default function StatusBar({
         <div className="status-stats">
           <div className="stat-item">
             <span className="stat-value">{agentCount}</span>
-            <span className="stat-label">总 Agent</span>
+            <span className="stat-label">{t.total}</span>
           </div>
           <div className="stat-divider" />
           <div className="stat-item">
             <span className="stat-value active">{activeCount}</span>
-            <span className="stat-label">活跃</span>
+            <span className="stat-label">{t.active}</span>
           </div>
           <div className="stat-divider" />
           <div className="stat-item">
             <span className="stat-value working">{workingCount}</span>
-            <span className="stat-label">工作中</span>
+            <span className="stat-label">{t.statusMap.working}</span>
           </div>
           <div className="stat-divider" />
           <div className="stat-item">
             <span className="stat-value thinking">{thinkingCount}</span>
-            <span className="stat-label">思考中</span>
+            <span className="stat-label">{t.statusMap.thinking}</span>
           </div>
         </div>
 
@@ -58,7 +61,7 @@ export default function StatusBar({
             }}
           />
           <span className="connection-text">
-            {isConnected ? '实时连接' : '断开连接'}
+            {isConnected ? t.connected : t.disconnected}
           </span>
         </div>
       </div>
